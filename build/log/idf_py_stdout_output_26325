@@ -1,0 +1,8 @@
+Command: ninja all
+[1/4] cd /home/simon/Projekt/mpu6050/build && /home/simon/.espressif/python_env/idf6.1_py3.14_env/bin/python /home/simon/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/simon/Projekt/mpu6050/build/partition_table/partition-table.bin /home/simon/Projekt/mpu6050/build/mpu6050.bin
+mpu6050.bin binary size 0x2d5f0 bytes. Smallest app partition is 0x100000 bytes. 0xd2a10 bytes (82%) free.
+[2/4] Performing build step for 'bootloader'
+[1/1] cd /home/simon/Projekt/mpu6050/build/bootloader && /home/simon/.espressif/python_env/idf6.1_py3.14_env/bin/python /home/simon/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /home/simon/Projekt/mpu6050/build/bootloader/bootloader.bin
+Bootloader binary size 0x5320 bytes. 0x2ce0 bytes (35%) free.
+[3/4] No install step for 'bootloader'
+[4/4] Completed 'bootloader'
