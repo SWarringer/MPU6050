@@ -1,0 +1,12 @@
+Command: ninja all
+[1/9] Performing build step for 'bootloader'
+[1/1] cd /home/simon/Projekt/mpu6050/build/bootloader && /home/simon/.espressif/python_env/idf6.1_py3.14_env/bin/python /home/simon/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /home/simon/Projekt/mpu6050/build/bootloader/bootloader.bin
+Bootloader binary size 0x5320 bytes. 0x2ce0 bytes (35%) free.
+[2/9] No install step for 'bootloader'
+[3/9] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/mpu6050.c.obj
+/home/simon/Projekt/mpu6050/main/mpu6050.c: In function 'app_main':
+/home/simon/Projekt/mpu6050/main/mpu6050.c:64:11: warning: unused variable 'wake_value' [-Wunused-variable]
+   64 |   uint8_t wake_value = 0x00;
+      |           ^~~~~~~~~~
+[4/9] Completed 'bootloader'
+[5/9] Linking C static library esp-idf/main/libmain.a
