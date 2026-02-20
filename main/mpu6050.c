@@ -54,17 +54,6 @@ esp_err_t read_reg(i2c_master_dev_handle_t dev, uint8_t reg, uint8_t *buffer,
                                      pdMS_TO_TICKS(100));
 }
 
-// esp_err_t who_am_i(i2c_master_dev_handle_t dev, uint8_t *whoami) {
-//
-//   uint8_t reg = 0x75;
-//   esp_err_t ret;
-//
-//   ret =
-//       i2c_master_transmit_receive(dev, &reg, 1, whoami, 1,
-//       pdMS_TO_TICKS(100));
-//   return ret;
-// }
-
 void mpu_start_up(i2c_master_dev_handle_t mpu) {
 
   // Read who_am_i register
