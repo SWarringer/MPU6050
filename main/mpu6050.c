@@ -15,7 +15,19 @@
 #define I2C_SCL_PIN 9
 #define MPU6050_ADDR 0x68
 #define I2C_FREQ_HZ 100000
+
+#define MPU_REG_PWR_MGMT_1 0x6B
+#define MPU_REG_WHO_AM_I 0x75
+#define MPU_REG_ACCEL_XOUT_H 0x3B
+#define MPU_REG_GYRO_XOUT_H 0x43
+
 static const char *TAG = "MPU6050";
+
+typedef struct {
+  float x;
+  float y;
+  float z;
+} mpu_coord_t;
 
 i2c_master_bus_handle_t i2c_init_bus() {
   i2c_master_bus_config_t i2c_mst_config = {
@@ -58,13 +70,13 @@ void mpu_start_up(i2c_master_dev_handle_t mpu) {
 
   // Read who_am_i register
   uint8_t whoami;
-  esp_err_t ret = read_reg(mpu, 0x75, &whoami, 1);
+  esp_err_t ret = read_reg(mpu, MPU_REG_WHO_AM_I, &whoami, 1);
   if (ret == ESP_OK) {
     ESP_LOGI(TAG, "WHO_AM_I = 0x%02X", whoami);
   } else {
     ESP_LOGE(TAG, "Failed to read WHO_AM_I, err=%d", ret);
   }
-  ret = write_reg(mpu, 0x6B, 0x00);
+  ret = write_reg(mpu, MPU_REG_PWR_MGMT_1, 0x00);
   if (ret == ESP_OK) {
     ESP_LOGI(TAG, "MPU6050 Wake up succeeded!");
   } else {
@@ -88,46 +100,96 @@ void mpu_start_up(i2c_master_dev_handle_t mpu) {
   }
 }
 
+esp_err_t read_accel_data(i2c_master_dev_handle_t mpu, mpu_coord_t *accel) {
+
+  uint8_t raw[6];
+  esp_err_t ret;
+  ret = read_reg(mpu, MPU_REG_ACCEL_XOUT_H, raw, 6);
+
+  if (ret != ESP_OK) {
+    return ret;
+  }
+  // (high << 8) | low
+  int16_t RAWX = (raw[0] << 8) | raw[1];
+  int16_t RAWY = (raw[2] << 8) | raw[3];
+  int16_t RAWZ = (raw[4] << 8) | raw[5];
+
+  accel->x = (float)RAWX / 16384.0f;
+  accel->y = (float)RAWY / 16384.0f;
+  accel->z = (float)RAWZ / 16384.0f;
+
+  return ESP_OK;
+}
+
+esp_err_t read_gyro_data(i2c_master_dev_handle_t mpu, mpu_coord_t *gyro) {
+
+  uint8_t raw[6];
+  esp_err_t ret;
+
+  ret = read_reg(mpu, MPU_REG_GYRO_XOUT_H, raw, 6);
+  if (ret != ESP_OK) {
+    return ret;
+  }
+
+  int16_t RAWX = (raw[0] << 8) | raw[1];
+  int16_t RAWY = (raw[2] << 8) | raw[3];
+  int16_t RAWZ = (raw[4] << 8) | raw[5];
+
+  gyro->x = (float)RAWX / 131.0f;
+  gyro->y = (float)RAWY / 131.0f;
+  gyro->z = (float)RAWZ / 131.0f;
+
+  return ESP_OK;
+}
+
+esp_err_t check_and_wake(i2c_master_dev_handle_t mpu) {
+
+  uint8_t pwr;
+  esp_err_t ret;
+
+  ret = read_reg(mpu, MPU_REG_PWR_MGMT_1, &pwr, 1);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to read PWR_MGMT");
+    return ret;
+  }
+  if (pwr & 0x40) {
+    ret = write_reg(mpu, MPU_REG_PWR_MGMT_1, 0x00);
+    if (ret != ESP_OK) {
+      ESP_LOGE(TAG, "MPU6050 Wake up failed!");
+      return ret;
+    }
+    ESP_LOGI(TAG, "MPU6050 Wake up succeeded!");
+  }
+  return ret;
+}
+
 void app_main(void) {
   i2c_master_bus_handle_t bus = i2c_init_bus();
   i2c_master_dev_handle_t mpu = i2c_add_device(bus);
-  esp_err_t ret;
+  mpu_coord_t accel;
+  mpu_coord_t gyro;
 
   vTaskDelay(pdMS_TO_TICKS(100));
 
   mpu_start_up(mpu);
   vTaskDelay(pdMS_TO_TICKS(100));
 
-  // Read values from the MPU6050
-  uint8_t data[6];
-
   while (1) {
-    ret = read_reg(mpu, 0x3B, data, 6);
 
-    if (ret == ESP_OK) {
-
-      int16_t RAWX = (data[0] << 8) | data[1];
-      int16_t RAWY = (data[2] << 8) | data[3];
-      int16_t RAWZ = (data[4] << 8) | data[5];
-
-      float xg = (float)RAWX / 16384.0f;
-      float yg = (float)RAWY / 16384.0f;
-      float zg = (float)RAWZ / 16384.0f;
-
-      ESP_LOGI(TAG, "x=%.2f  y=%.2f  z=%.2f", xg, yg, zg);
-    } else {
+    if (read_accel_data(mpu, &accel) != ESP_OK) {
       ESP_LOGE(TAG, "Failed to read accel data");
+    } else {
+      ESP_LOGI(TAG, "Accelerometer: x=%.2f, y=%.2f, z=%.2f", accel.x, accel.y,
+               accel.z);
     }
-    uint8_t pwr;
-    read_reg(mpu, 0x6B, &pwr, 1);
-    if (pwr == 0x40) {
-      ret = write_reg(mpu, 0x6B, 0x00);
-      if (ret == ESP_OK) {
-        ESP_LOGI(TAG, "MPU6050 Wake up succeeded!");
-      } else {
-        ESP_LOGE(TAG, "MPU6050 Wake up failed!");
-      }
+    if (read_gyro_data(mpu, &gyro) != ESP_OK) {
+      ESP_LOGE(TAG, "Failed to read gyro data");
+    } else {
+      ESP_LOGI(TAG, "Gyroscope: x=%.2f, y=%.2f, z=%.2f", gyro.x, gyro.y,
+               gyro.z);
     }
+
+    check_and_wake(mpu);
 
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
