@@ -1,5 +1,5 @@
 idf_component_register(
     SRCS "main.c"
     INCLUDE_DIRS "."
-    REQUIRES mpu6050
+    PRIV_REQUIRES i2c_bus esp_timer driver log freertos mpu6050
 )
