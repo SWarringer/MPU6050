@@ -1,7 +1,10 @@
 -- Current work --
-- [ ] Figure out CMake and file structures.
-- [ ] Refactor code and separate 
+- [x] Figure out CMake and file structures.
+- [x] Refactor code and separate 
 - [ ] Look into filters 
+- [ ] Implement complementary filter
+- [ ] Research Kalman filters
+- [ ] Move files into larger drone project and continue from there 
 
 
 -- Additional work --
