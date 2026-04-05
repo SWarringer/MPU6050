@@ -1,6 +1,56 @@
-# Build artifacts
-/build/
-/CMakeFiles/
-/Makefile
-/cmake_build/
-/.cache/
+# ESP-IDF build output
+build/
+sdkconfig
+sdkconfig.old
+*.bin
+*.elf
+*.map
+*.o
+*.d
+*.so
+
+# ESP-IDF component manager
+dependencies.lock
+managed_components/
+
+# Python virtual environment
+venv/
+env/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Python virtual environment tool specific
+Pipfile.lock
+poetry.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+build/log/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Your Python listener script runtime files
+*.pkl
+*.db
+*.sqlite
+*.csv
+*.npy
+
