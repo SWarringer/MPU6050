@@ -8,6 +8,7 @@ sdkconfig.old
 *.o
 *.d
 *.so
+.cache/
 
 # ESP-IDF component manager
 dependencies.lock

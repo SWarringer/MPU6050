@@ -1,6 +1,5 @@
 -- Current work --
-- [x] Figure out CMake and file structures.
-- [x] Refactor code and separate 
+- [ ] Get UDP to transmit raw IMU data for logging and analysis
 - [ ] Look into filters 
 - [ ] Implement complementary filter
 - [ ] Research Kalman filters
@@ -8,6 +7,10 @@
 
 
 -- Additional work --
-- [ ] Implement micro_ros publishing for values
 - [ ] Use ROS2 for data visualization and logging 
 - [ ] For later in project, research ROS2 HIL capabilities 
+
+## Archive
+
+- [x] Figure out CMake and file structures.
+- [x] Refactor code and separate 
