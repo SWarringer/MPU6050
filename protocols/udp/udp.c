@@ -37,6 +37,15 @@ void udp_client_task(void *pvParameters) {
     // Continue without timeout if setting fails, or handle error
   }
 
+  send_and_receive(sock, dest_addr, rx_buffer);
+
+  ESP_LOGI(TAG, "Client task finished. Shutting down socket.");
+  close(sock);
+  vTaskDelete(NULL);
+}
+
+void send_and_receive(int sock, struct sockaddr_in dest_addr, char *rx_buffer) {
+
   for (int i = 0; i < 5; i++) { // Send a few messages
     // Send message
     int err = sendto(sock, CLIENT_MESSAGE, strlen(CLIENT_MESSAGE), 0,
@@ -66,11 +75,5 @@ void udp_client_task(void *pvParameters) {
       ESP_LOGI(TAG, "Received %d bytes: %s", len, rx_buffer);
       // Optionally, check if source_addr matches the server's address
     }
-    vTaskDelay(
-        pdMS_TO_TICKS(2000)); // Wait 2 seconds before sending next message
   }
-
-  ESP_LOGI(TAG, "Client task finished. Shutting down socket.");
-  close(sock);
-  vTaskDelete(NULL);
 }
